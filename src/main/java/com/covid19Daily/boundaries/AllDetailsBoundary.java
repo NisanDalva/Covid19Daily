@@ -14,7 +14,6 @@ public class AllDetailsBoundary {
     public AllDetailsBoundary() {
     }
 
-
     public int getPopulation() {
         return this.population;
     }
@@ -29,6 +28,11 @@ public class AllDetailsBoundary {
 
     public void setDates(Map<String,Integer> dates) {
         this.dates = dates;
+    }
+
+    @Override
+    public String toString() {
+        return "AllDetailsBoundary [dates=" + dates + ", population=" + population + "]";
     }
 
 }
