@@ -29,13 +29,18 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
         this.restTemplate = new RestTemplate();
     }
 
-    @Autowired
+	@Autowired
 	public void setUtils(Utils utils) {
 		this.utils = utils;
 	}
 
 
     public Integer getDailyConfirmedCasesByCountry(String country, String date) {
+        AllDetailsBoundary info = getInfoByCountry(country);
+        if (info == null)
+        // if entered an invalid country, then return status 400 BAD REQUEST
+            throw new InvalidCountryException("Enter a valid country, got: \'" + country + "\'");
+        
         Date givenDate = null;
         
         try {
@@ -46,12 +51,6 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
         }
 
         Date yesterday = utils.getPreviousDay(givenDate);
-
-        AllDetailsBoundary info = getInfoByCountry(country);
-        if (info == null)
-        // if entered an invalid country, then return status 400 BAD REQUEST
-            throw new InvalidCountryException("Enter a valid country, got: \'" + country + "\'");
-
 
         Integer confirmedGivenDay = info.getDates().get(utils.getApiFormatter().format(givenDate));
         Integer confirmedYesterday = info.getDates().get(utils.getApiFormatter().format(yesterday));
@@ -71,6 +70,14 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
     }
 
     public ArrayList<Double> compareCountries(String sourceCountry, String targetCountry, String from, String to) {
+        // get all the information we need for both countries
+        AllDetailsBoundary sourceInfo = getInfoByCountry(sourceCountry);
+        AllDetailsBoundary targetInfo = getInfoByCountry(targetCountry);
+        
+        if (sourceInfo == null || targetInfo == null)
+            // if entered an invalid country, then return status 400 BAD REQUEST
+            throw new InvalidCountryException("Enter a valid country, got: \'" + sourceCountry + "\' and \'" + targetCountry + "\'");
+        
         Date fromDate = null;
         Date toDate = null;
         
@@ -88,16 +95,11 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
             throw new RangeDateException("\'from\'' date can\'t be after \'to\' date, got: "
                                             + "from: \'" + from + "\', to: \'" + to + "\'");
         
-        // get all the information we need for both countries
-        AllDetailsBoundary sourceInfo = getInfoByCountry(sourceCountry);
-        AllDetailsBoundary targetInfo = getInfoByCountry(targetCountry);
-        if (sourceInfo == null || targetInfo == null)
-            // if entered an invalid country, then return status 400 BAD REQUEST
-            throw new InvalidCountryException("Enter a valid country, got: \'" + sourceCountry + "\' and \'" + targetCountry);
-
+        // population for both countries
         Double sourcePopulation = sourceInfo.getPopulation().doubleValue();
         Double targetPopulation = targetInfo.getPopulation().doubleValue();
         
+        // all dates for calculation
         List<String> allDates = utils.getDatesRange(fromDate, toDate);
         
         ArrayList<Double> rv = allDates.stream()
@@ -131,4 +133,5 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
         HistoryBoundary response = restTemplate.getForObject(query, HistoryBoundary.class);
         return response.getAll();
     }
+    
 }
