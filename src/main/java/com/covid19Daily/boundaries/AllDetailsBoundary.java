@@ -7,18 +7,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllDetailsBoundary {
     
-    private int population;
+    private Integer population;
     private Map<String, Integer> dates;
 
 
     public AllDetailsBoundary() {
     }
 
-    public int getPopulation() {
+    public Integer getPopulation() {
         return this.population;
     }
 
-    public void setPopulation(int population) {
+    public void setPopulation(Integer population) {
         this.population = population;
     }
 

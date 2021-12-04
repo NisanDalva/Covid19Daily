@@ -1,5 +1,7 @@
 package com.covid19Daily.controller;
 
+import java.util.List;
+
 import com.covid19Daily.logic.ConfirmedLogicImplementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +22,6 @@ public class ConfirmedController {
         this.confirmedLogicImplementation = confirmedLogicImplementation;
     }
     
-    
-
     @RequestMapping(
 			path = "/daily",
 			method = RequestMethod.GET,
@@ -32,5 +32,20 @@ public class ConfirmedController {
     ) {
         return confirmedLogicImplementation.getDailyConfirmedCasesByCountry(country, date);
     }
+
+    @RequestMapping(
+			path = "/compare",
+			method = RequestMethod.GET,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Double> compareBetweentwoCountries(
+        @RequestParam(name = "sourceCountry", required = true) String sourceCountry,
+        @RequestParam(name = "targetcountry", required = true) String targetcountry,
+        @RequestParam(name = "from", required = true) String from,
+        @RequestParam(name = "to", required = true) String to
+    ) {
+        // return Arrays.asList(1, 2, 3);
+        return confirmedLogicImplementation.compareCountries(sourceCountry, targetcountry, from, to);
+    }
+    
     
 }
