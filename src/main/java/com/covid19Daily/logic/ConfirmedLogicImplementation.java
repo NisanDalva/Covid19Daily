@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.covid19Daily.Utils;
 import com.covid19Daily.boundaries.AllDetailsBoundary;
 import com.covid19Daily.boundaries.HistoryBoundary;
+import com.covid19Daily.exceptions.InvalidCountryException;
 import com.covid19Daily.exceptions.InvalidDateException;
 import com.covid19Daily.exceptions.RangeDateException;
 
@@ -47,6 +48,10 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
         Date yesterday = utils.getPreviousDay(givenDate);
 
         AllDetailsBoundary info = getInfoByCountry(country);
+        if (info == null)
+        // if entered an invalid country, then return status 400 BAD REQUEST
+            throw new InvalidCountryException("Enter a valid country, got: \'" + country + "\'");
+
 
         Integer confirmedGivenDay = info.getDates().get(utils.getApiFormatter().format(givenDate));
         Integer confirmedYesterday = info.getDates().get(utils.getApiFormatter().format(yesterday));
@@ -86,7 +91,10 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
         // get all the information we need for both countries
         AllDetailsBoundary sourceInfo = getInfoByCountry(sourceCountry);
         AllDetailsBoundary targetInfo = getInfoByCountry(targetCountry);
-        
+        if (sourceInfo == null || targetInfo == null)
+            // if entered an invalid country, then return status 400 BAD REQUEST
+            throw new InvalidCountryException("Enter a valid country, got: \'" + sourceCountry + "\' and \'" + targetCountry);
+
         Double sourcePopulation = sourceInfo.getPopulation().doubleValue();
         Double targetPopulation = targetInfo.getPopulation().doubleValue();
         
@@ -95,7 +103,7 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
         ArrayList<Double> rv = allDates.stream()
                             .map((date) -> {
                                 try {
-                                    // get the cumulative confirmed cases for each country that fits to each date
+                                    // get the cumulative confirmed cases for both countries that fits to each date
                                     Double sourceCumulative = sourceInfo.getDates().get(date).doubleValue();
                                     Double targetCumulative = targetInfo.getDates().get(date).doubleValue();
 
@@ -114,7 +122,8 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
     /**
      * Get limited information by given country
      * @param country
-     * @return {@code AllDetailsBoundary} - Only contains the population and all the dates available in the API
+     * @return {@code AllDetailsBoundary} - Only contains the population and all the dates available in the API,
+     * if the given country is invalid country, then return {@code null}
      */
     private AllDetailsBoundary getInfoByCountry(String country) {
         String query = ROOT_URL + "/history?status=confirmed&country=" + country;
