@@ -1,7 +1,5 @@
 package com.covid19Daily.controller;
 
-import java.util.ArrayList;
-
 import com.covid19Daily.logic.ConfirmedLogicImplementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +30,7 @@ public class ConfirmedController {
         @RequestParam(name = "country", required = true) String country,
         @RequestParam(name = "date", required = true) String date
     ) {
-        // STUB implementation
-        return 0;
+        return confirmedLogicImplementation.getDailyConfirmedCasesByCountry(country, date);
     }
     
 }
