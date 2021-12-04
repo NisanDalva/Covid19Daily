@@ -6,30 +6,51 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Utils {
-    
+    // the format in which the user asks to input dates
     private final String INPUT_DATE_FORMAT = "dd-MM-yyyy";
-    SimpleDateFormat formatter;
 
-    @Autowired
+    // the format the API uses
+    private final String API_DATE_FORMAT = "yyyy-MM-dd";
+
+    private SimpleDateFormat inputFormatter;
+    private SimpleDateFormat apiFormatter;
+
     public Utils() {
-        formatter = new SimpleDateFormat(INPUT_DATE_FORMAT);
-        formatter.setLenient(false);
+        inputFormatter = new SimpleDateFormat(INPUT_DATE_FORMAT);
+        inputFormatter.setLenient(false);
+
+        apiFormatter = new SimpleDateFormat(API_DATE_FORMAT);
+        apiFormatter.setLenient(false);
     }
 
+    public String getINPUT_DATE_FORMAT() {
+        return INPUT_DATE_FORMAT;
+    }
+
+    public String getAPI_DATE_FORMAT() {
+        return API_DATE_FORMAT;
+    }
+
+    public SimpleDateFormat getInputFormatter() {
+        return inputFormatter;
+    }
+
+    public SimpleDateFormat getApiFormatter() {
+        return apiFormatter;
+    }
 
     /**
      * Check and parse a string that presents a date and convert it to {@code Date} object
      * @param date - A simple date representing in string format
      * @return {@code Date} - The same date as an object
-     * @throws ParseException - if a date is incorrect or in incorrect format
+     * @throws ParseException if a date is incorrect or in incorrect format
      */
-    public Date parseDate(String date) throws ParseException {
-        return formatter.parse(date);
+    public Date parseInputDate(String date) throws ParseException {
+        return inputFormatter.parse(date);
     }
 
     /**
@@ -62,11 +83,9 @@ public class Utils {
      * Get all dates between two different dates
      * @param from - The Start date
      * @param to - The end date INCLUDING
-     * @return {@code ArrayList<String>} contains all the dates in format that fits to {@code formater} object
+     * @return {@code ArrayList<String>} contains all the dates in format that fits to the {@code API} format date
      */
     public ArrayList<String> getDatesRange(Date from, Date to) {
-        SimpleDateFormat apiFormatter = new SimpleDateFormat("yyyy-MM-dd");
-
         ArrayList<String> rv = new ArrayList<>();
         to = getNextDay(to);
         
@@ -77,6 +96,5 @@ public class Utils {
 
         return rv;
     }
-
 
 }

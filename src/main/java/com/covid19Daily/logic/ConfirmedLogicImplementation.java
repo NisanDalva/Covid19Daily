@@ -1,13 +1,16 @@
 package com.covid19Daily.logic;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.covid19Daily.Utils;
 import com.covid19Daily.boundaries.AllDetailsBoundary;
 import com.covid19Daily.boundaries.HistoryBoundary;
+import com.covid19Daily.exceptions.InvalidDateException;
+import com.covid19Daily.exceptions.RangeDateException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,14 +20,11 @@ import org.springframework.web.client.RestTemplate;
 public class ConfirmedLogicImplementation implements ConfirmedLogic {
     
     private final String ROOT_URL = "https://covid-api.mmediagroup.fr/v1";
-    private final String API_DATE_FORMAT = "yyyy-MM-dd";
     
-    SimpleDateFormat formatter;
     private RestTemplate restTemplate;
     private Utils utils;
 
     public ConfirmedLogicImplementation() {
-        this.formatter = new SimpleDateFormat(API_DATE_FORMAT);
         this.restTemplate = new RestTemplate();
     }
 
@@ -38,17 +38,18 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
         Date givenDate = null;
         
         try {
-            givenDate = utils.parseDate(date);
+            givenDate = utils.parseInputDate(date);
         } catch (ParseException e) {
-            throw new RuntimeException();
+            // return status 400 BAD REQUEST
+            throw new InvalidDateException("Enter a valid date in format \'" + utils.getINPUT_DATE_FORMAT() + "\'', got: \'" + date + "\'");
         }
 
         Date yesterday = utils.getPreviousDay(givenDate);
 
         AllDetailsBoundary info = getInfoByCountry(country);
 
-        Integer confirmedGivenDay = info.getDates().get(formatter.format(givenDate));
-        Integer confirmedYesterday = info.getDates().get(formatter.format(yesterday));
+        Integer confirmedGivenDay = info.getDates().get(utils.getApiFormatter().format(givenDate));
+        Integer confirmedYesterday = info.getDates().get(utils.getApiFormatter().format(yesterday));
 
         // the normal result, both dates are available in the database
         // since the API gives the cumulative confirmed cases, calculate the relative between the previous day
@@ -64,54 +65,48 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
         return 0;
     }
 
-
     public ArrayList<Double> compareCountries(String sourceCountry, String targetCountry, String from, String to) {
         Date fromDate = null;
         Date toDate = null;
         
         try {
-            fromDate = utils.parseDate(from);
-            toDate = utils.parseDate(to);
+            fromDate = utils.parseInputDate(from);
+            toDate = utils.parseInputDate(to);
         } catch (ParseException e) {
-            throw new RuntimeException();
+            // if entered an invalid date, then return status 400 BAD REQUEST
+            throw new InvalidDateException("Enter a valid date in format \'" + utils.getINPUT_DATE_FORMAT()
+                                            + "\'', got: \'" + from + "\' and \'" + to + "\'");
         }
         
         if (fromDate.after(toDate))
-            throw new RuntimeException(); //TODO handle http status
+        // if entered an invalid range, then return status 400 BAD REQUEST
+            throw new RangeDateException("\'from\'' date can\'t be after \'to\' date, got: "
+                                            + "from: \'" + from + "\', to: \'" + to + "\'");
         
+        // get all the information we need for both countries
         AllDetailsBoundary sourceInfo = getInfoByCountry(sourceCountry);
         AllDetailsBoundary targetInfo = getInfoByCountry(targetCountry);
         
         Double sourcePopulation = sourceInfo.getPopulation().doubleValue();
         Double targetPopulation = targetInfo.getPopulation().doubleValue();
-
-        System.out.println("sourcePopulation = " + sourcePopulation);
-        System.out.println("targetPopulation = " + targetPopulation);
         
-        ArrayList<String> allDates = utils.getDatesRange(fromDate, toDate);
-        ArrayList<Double> rv = new ArrayList<>();
+        List<String> allDates = utils.getDatesRange(fromDate, toDate);
         
-        for (String date: allDates) {
-            try {
-                Double sourceCumulative = sourceInfo.getDates().get(date).doubleValue();
-                Double targetCumulative = targetInfo.getDates().get(date).doubleValue();
-    
-                System.out.println("============================");
-    
-                System.out.println("for date = " + date);
-                System.out.println("sourceCumulative = " + sourceCumulative);
-                System.out.println("targetCumulative = " + targetCumulative);
-    
-                System.out.println("============================");
-                // the actual comparison between the countries
-                rv.add((sourceCumulative / sourcePopulation) - (targetCumulative / targetPopulation));
+        ArrayList<Double> rv = allDates.stream()
+                            .map((date) -> {
+                                try {
+                                    // get the cumulative confirmed cases for each country that fits to each date
+                                    Double sourceCumulative = sourceInfo.getDates().get(date).doubleValue();
+                                    Double targetCumulative = targetInfo.getDates().get(date).doubleValue();
 
-            } catch (NullPointerException e) {
-                // do nothing, just in case at least one of the dates is missing in the database
-            }
-        }
-        
-
+                                    // the actual comparison between the countries
+                                    return (sourceCumulative / sourcePopulation) - (targetCumulative / targetPopulation);
+                                } catch (NullPointerException e) {
+                                    // just in case at least one of the dates is missing from the API
+                                    return null;
+                                }
+                            })
+                            .collect(Collectors.toCollection(ArrayList::new));
 
         return rv;
     }
@@ -122,7 +117,7 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
      * @return {@code AllDetailsBoundary} - Only contains the population and all the dates available in the API
      */
     private AllDetailsBoundary getInfoByCountry(String country) {
-        String query = ROOT_URL + "/history?status=confirmed&country=" + country; //TODO handle invalid country
+        String query = ROOT_URL + "/history?status=confirmed&country=" + country;
 
         HistoryBoundary response = restTemplate.getForObject(query, HistoryBoundary.class);
         return response.getAll();
