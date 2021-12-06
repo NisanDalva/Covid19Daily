@@ -68,6 +68,10 @@ Calculate the daily difference between the percentages of the population confirm
 ----
 There are two ways to test this project:  
 1. **Pull it directly from Docker Hub**  
+    * login to your docker account by type the following:
+    ```
+    docker login
+    ```
     * Open a command line and type the following command:
     ```
     docker pull nisandalva/covid19daily
