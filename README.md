@@ -1,3 +1,5 @@
+Here is the endpoints the system supports:  
+
 **New confirmed cases**
 ----
 Get number of confirmed cases by country that fits to a specific date.
@@ -68,11 +70,11 @@ There are two ways to test this project:
 1. **Pull it directly from Docker Hub**  
     * Open a command line and type the following command:
     ```
-    $ docker pull nisandalva/covid19daily
+    docker pull nisandalva/covid19daily
     ```
     * Next, type this command:
     ```
-    $ docker run -p PORT:8080 nisandalva/covid19daily
+    docker run -p PORT:8080 nisandalva/covid19daily
     ```
     Feel free to choose the PORT to whatever you want.
 
@@ -80,19 +82,19 @@ There are two ways to test this project:
 2. **Build and run it in your machine**
     * Clone this repository by typing the following:
     ```
-    $ git clone https://github.com/NisanDalva/Covid19Daily.git
+    git clone https://github.com/NisanDalva/Covid19Daily.git
     ```
     
     * Open a command line and change the working directory to the folder contains all the project resources.
 
     * Type:
     ```
-    $ docker build -t covid19daily .
+    docker build -t covid19daily .
     ```
     (Pay attention to the dot at the end of command)
     
     * Finally run the following:
     ```
-    $ docker run -p PORT:8080 covid19daily
+    docker run -p PORT:8080 covid19daily
     ```
     Feel free to choose the PORT to whatever you want.
