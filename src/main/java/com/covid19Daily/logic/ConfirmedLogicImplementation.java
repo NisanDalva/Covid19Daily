@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.covid19Daily.Utils;
 import com.covid19Daily.boundaries.AllDetailsBoundary;
 import com.covid19Daily.boundaries.HistoryBoundary;
 import com.covid19Daily.exceptions.InvalidCountryException;
@@ -34,7 +33,7 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
 		this.utils = utils;
 	}
 
-
+    @Override
     public Integer getDailyConfirmedCasesByCountry(String country, String date) {
         AllDetailsBoundary info = getInfoByCountry(country);
         if (info == null)
@@ -68,6 +67,7 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
         return 0;
     }
 
+    @Override
     public ArrayList<Double> compareCountries(String sourceCountry, String targetCountry, String from, String to) {
         // get all the information we need for both countries
         AllDetailsBoundary sourceInfo = getInfoByCountry(sourceCountry);

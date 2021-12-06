@@ -1,4 +1,4 @@
-package com.covid19Daily;
+package com.covid19Daily.logic;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
