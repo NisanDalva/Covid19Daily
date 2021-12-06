@@ -39,13 +39,11 @@ public class ConfirmedController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Double> compareBetweentwoCountries(
         @RequestParam(name = "sourceCountry", required = true) String sourceCountry,
-        @RequestParam(name = "targetcountry", required = true) String targetcountry,
+        @RequestParam(name = "targetCountry", required = true) String targetcountry,
         @RequestParam(name = "from", required = true) String from,
         @RequestParam(name = "to", required = true) String to
     ) {
-        // return Arrays.asList(1, 2, 3);
         return confirmedLogicImplementation.compareCountries(sourceCountry, targetcountry, from, to);
     }
-    
     
 }

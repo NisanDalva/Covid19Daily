@@ -42,7 +42,6 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
             throw new InvalidCountryException("Enter a valid country, got: \'" + country + "\'");
         
         Date givenDate = null;
-        
         try {
             givenDate = utils.parseInputDate(date);
         } catch (ParseException e) {
@@ -131,7 +130,7 @@ public class ConfirmedLogicImplementation implements ConfirmedLogic {
         String query = ROOT_URL + "/history?status=confirmed&country=" + country;
 
         HistoryBoundary response = restTemplate.getForObject(query, HistoryBoundary.class);
-        return response.getAll();
+        return response.getAll(); // can be null if the country is invalid
     }
     
 }
