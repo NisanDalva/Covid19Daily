@@ -1,0 +1,77 @@
+{
+	"info": {
+		"_postman_id": "f99aeab3-00be-44ff-af64-d195580524c6",
+		"name": "covid19",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get daily confirmed by countery and date",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/confirmed/daily?country=Germany&date=13-05-2021",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"confirmed",
+						"daily"
+					],
+					"query": [
+						{
+							"key": "country",
+							"value": "Germany"
+						},
+						{
+							"key": "date",
+							"value": "13-05-2021"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "compare between two countries",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/confirmed/compare?sourceCountry=Germany&targetCountry=France&from=12-05-2021&to=13-05-2021",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"confirmed",
+						"compare"
+					],
+					"query": [
+						{
+							"key": "sourceCountry",
+							"value": "Germany"
+						},
+						{
+							"key": "targetCountry",
+							"value": "France"
+						},
+						{
+							"key": "from",
+							"value": "12-05-2021"
+						},
+						{
+							"key": "to",
+							"value": "13-05-2021"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
